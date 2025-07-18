@@ -1,0 +1,41 @@
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+import random
+import joblib
+
+# Mock training data (pH, temp), label: 1 = release, 0 = don't release
+X_train = np.array([
+    [1.8, 37], [2.5, 36.9], [3.2, 37.1],  # release
+    [6.0, 36.5], [7.4, 37], [5.0, 36.8],  # don't release
+    [2.9, 37.2], [1.6, 36.9], [3.3, 37.1], # release
+    [8.0, 38], [4.0, 36.7], [6.5, 37.5]    # don't release
+])
+y_train = np.array([1,1,1,0,0,0,1,1,1,0,0,0])
+
+# Train model
+model = RandomForestClassifier(n_estimators=10, random_state=42)
+model.fit(X_train, y_train)
+
+# Save model (simulate embedded model usage)
+joblib.dump(model, 'smart_pill_model.pkl')
+
+# Simulated live sensor reading function
+def get_sensor_data():
+    # In real life, this would be from pH sensor & temp sensor
+    pH = round(random.uniform(1.0, 8.0), 1)
+    temp = round(random.uniform(36.0, 38.0), 1)
+    return np.array([[pH, temp]])
+
+# Load model
+model = joblib.load('smart_pill_model.pkl')
+
+# Use in loop (simulate pill inside body)
+for _ in range(5):  # simulate 5 sensor readings
+    input_data = get_sensor_data()
+    pH, temp = input_data[0]
+    decision = model.predict(input_data)[0]
+    print(f"Sensor Reading -> pH: {pH}, Temp: {temp}°C")
+    if decision == 1:
+        print("🟢 Decision: RELEASE drug.\n")
+    else:
+        print("🔴 Decision: DO NOT release drug.\n")
